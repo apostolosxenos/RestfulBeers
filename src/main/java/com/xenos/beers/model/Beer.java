@@ -1,23 +1,32 @@
 package com.xenos.beers.model;
 
 import java.util.UUID;
+import javax.persistence.*;
 
+@Entity
+@Table(name = "beers")
 public class Beer {
 
-    //attributes
+    @Id
+    @Column(name = "uuid")
     private UUID uuid;
+
+    @Column(name = "brand")
     private String brand;
+
+    @Column(name = "appearance")
     private String appearance;
+
+    @Column(name = "aroma")
     private String aroma;
+
+    @Column(name = "alcohol")
     private float alcohol;
 
-    //constructor
-    public Beer(
-            UUID uuid,
-            String brand,
-            String appearance,
-            String aroma,
-            float alcohol) {
+    public Beer() {
+    }
+
+    public Beer(UUID uuid, String brand, String appearance, String aroma, float alcohol) {
         this.uuid = uuid;
         this.brand = brand;
         this.appearance = appearance;
@@ -25,44 +34,48 @@ public class Beer {
         this.alcohol = alcohol;
     }
 
-    //getters and setters
     public UUID getUuid() {
         return uuid;
-    }
-
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
     }
 
     public String getBrand() {
         return brand;
     }
 
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
-
     public String getAppearance() {
         return appearance;
-    }
-
-    public void setAppearance(String appearance) {
-        this.appearance = appearance;
     }
 
     public String getAroma() {
         return aroma;
     }
 
-    public void setAroma(String aroma) {
-        this.aroma = aroma;
-    }
-
     public float getAlcohol() {
         return alcohol;
     }
 
+    public void setUuid(UUID beerId) {
+        this.uuid = beerId;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public void setAppearance(String appearance) {
+        this.appearance = appearance;
+    }
+
+    public void setAroma(String aroma) {
+        this.aroma = aroma;
+    }
+
     public void setAlcohol(float alcohol) {
         this.alcohol = alcohol;
+    }
+
+    @Override
+    public String toString() {
+        return "Beer [UUID=" + uuid + ", Brand=" + brand + ", Appearance=" + appearance + ", Aroma=" + aroma + ", Alcohol=" + alcohol + "]";
     }
 }
