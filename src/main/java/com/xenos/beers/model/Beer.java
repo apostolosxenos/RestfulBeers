@@ -1,14 +1,20 @@
 package com.xenos.beers.model;
 
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.GenericGenerator;
+
 import java.util.UUID;
 import javax.persistence.*;
 
 @Entity
 @Table(name = "beers")
+@DynamicUpdate
 public class Beer {
 
     @Id
-    @Column(name = "uuid")
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(name = "uuid", columnDefinition = "BINARY(16)")
     private UUID uuid;
 
     @Column(name = "brand")
@@ -26,8 +32,7 @@ public class Beer {
     public Beer() {
     }
 
-    public Beer(UUID uuid, String brand, String appearance, String aroma, float alcohol) {
-        this.uuid = uuid;
+    public Beer(String brand, String appearance, String aroma, float alcohol) {
         this.brand = brand;
         this.appearance = appearance;
         this.aroma = aroma;
