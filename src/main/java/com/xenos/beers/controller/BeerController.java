@@ -1,125 +1,58 @@
 package com.xenos.beers.controller;
 
 import com.xenos.beers.model.Beer;
-import com.xenos.beers.repository.BeerRepository;
+import com.xenos.beers.service.BeerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api")
 public class BeerController {
 
     @Autowired
-    BeerRepository beerRepository;
+    BeerService beerService;
 
     @GetMapping("/beers")
     public ResponseEntity<List<Beer>> getAllBeers(@RequestParam(required = false) String brand) {
-
-        try {
-
-            List<Beer> beers = new ArrayList<>();
-
-            if (brand == null) {
-                beerRepository.findAll().forEach(beers::add);
-            } else {
-                beerRepository.findByBrand(brand).forEach(beers::add);
-            }
-
-            if (beers.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-
-            return new ResponseEntity<>(beers, HttpStatus.OK);
-
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        if (beerService.getAllBeers().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
+        return new ResponseEntity<>(beerService.getAllBeers(), HttpStatus.OK);
     }
 
     @GetMapping("/beers/{uuid}")
-    public ResponseEntity<Beer> getTutorialByUuid(@PathVariable("uuid") UUID uuid) {
-
-        Optional<Beer> beer = beerRepository.findById(uuid);
-
-        if (beer.isPresent()) {
-
-            return new ResponseEntity<>(beer.get(), HttpStatus.OK);
-
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<Beer> getBeerByUuid(@PathVariable("uuid") UUID uuid) {
+        Optional<Beer> beer = Optional.ofNullable(beerService.getBeerByUuid(uuid));
+        if (beer.isPresent()) return new ResponseEntity(beer, HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @PostMapping("/beers")
-    public ResponseEntity<Beer> createTutorial(@RequestBody Beer beer) {
-
-        try {
-
-            Beer newBeer = beerRepository
-                    .save(new Beer(beer.getBrand(),
-                            beer.getAppearance(),
-                            beer.getAroma(),
-                            beer.getAlcohol()));
-            return new ResponseEntity<>(newBeer, HttpStatus.CREATED);
-
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<Beer> postBeer(@RequestBody Beer beer) {
+        beerService.insertBeer(beer);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/beers/{uuid}")
-    public ResponseEntity<Beer> updateBeer(@PathVariable("uuid") UUID uuid, @RequestBody Beer beer) {
-
-        Optional<Beer> beerInDatabase = beerRepository.findById(uuid);
-
-        if (beerInDatabase.isPresent()) {
-
-            if(beer.getBrand() == null || beer.getBrand().isEmpty()) {
-                beer.setBrand(beerInDatabase.get().getBrand());
-            }
-
-            if(beer.getAppearance() == null || beer.getAppearance().isEmpty()) {
-                beer.setAppearance(beerInDatabase.get().getAppearance());
-            }
-
-            if(beer.getAroma() == null || beer.getAroma().isEmpty()) {
-                beer.setAroma(beerInDatabase.get().getAroma());
-            }
-
-            if(beer.getAlcohol() == 0.0f) {
-                beer.setAlcohol(beerInDatabase.get().getAlcohol());
-            }
-
-            beer.setUuid(beerInDatabase.get().getUuid());
-
-            return new ResponseEntity<>(beerRepository.save(beer), HttpStatus.OK);
-
-        } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
+    public ResponseEntity<Beer> putBeer(@PathVariable("uuid") UUID uuid, @RequestBody Beer beerData) {
+        if (beerService.updateBeer(uuid, beerData) == -1) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @DeleteMapping("/beers/{uuid}")
-    public ResponseEntity<HttpStatus> deleteBeer(@PathVariable("uuid") UUID uuid) {
-
-        Optional<Beer> beerInDatabase = beerRepository.findById(uuid);
-
-        if (beerInDatabase.isPresent()) {
-            beerRepository.deleteById(uuid);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
+    public ResponseEntity<Beer> deleteBeerByUuid(@PathVariable("uuid") UUID uuid) {
+        if (beerService.deleteByUuid(uuid) == -1)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @DeleteMapping("/beers")
     public ResponseEntity<HttpStatus> deleteAllBeers() {
-        beerRepository.deleteAll();
-        return new ResponseEntity<>(HttpStatus.OK);
+        if (beerService.deleteAll() != 1) return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

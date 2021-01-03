@@ -6,6 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 import java.util.UUID;
 import javax.persistence.*;
 
+
 @Entity
 @Table(name = "beers")
 @DynamicUpdate
