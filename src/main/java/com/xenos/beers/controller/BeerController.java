@@ -18,10 +18,20 @@ public class BeerController {
 
     @GetMapping("/beers")
     public ResponseEntity<List<Beer>> getAllBeers(@RequestParam(required = false) String brand) {
-        if (beerService.getAllBeers().isEmpty()) {
+
+        List<Beer> beers = new ArrayList<Beer>();
+
+        if (brand == null) {
+            beerService.getAllBeers().forEach(beers::add);
+        } else {
+            beerService.getAllBeersByBrand(brand).forEach(beers::add);
+        }
+
+        if (beers.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
-        return new ResponseEntity<>(beerService.getAllBeers(), HttpStatus.OK);
+
+        return new ResponseEntity<>(beers, HttpStatus.OK);
     }
 
     @GetMapping("/beers/{uuid}")

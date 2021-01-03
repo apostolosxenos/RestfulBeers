@@ -22,6 +22,10 @@ public class BeerService {
         return beers;
     }
 
+    public List<Beer> getAllBeersByBrand(String brand) {
+        return beerRepository.findByBrand(brand);
+    }
+
     public Beer getBeerByUuid(UUID uuid) {
         return beerRepository.findById(uuid).get();
     }
